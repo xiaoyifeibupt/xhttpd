@@ -9,66 +9,66 @@ template<typename T>
 class Buffer
 {
 public:
-	Buffer(size_t capacity = 1024) : capacity(capacity) , size(0) {
-		if (capacity == 0) {
-			data = nullptr;
+	Buffer(size_t capacity = 1024) : capacity_(capacity) , size_(0) {
+		if (capacity_ == 0) {
+			data_ = nullptr;
 			return;
 		}
 
-		data = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
-		if (!data) {
+		data_ = reinterpret_cast<T*>(malloc(capacity * sizeof(T)));
+		if (!data_) {
 			THROW_SYSTEM_ERROR();
 		}
 	}
 
 	~Buffer() {
-		if (data) {
-			free(data);
+		if (data_) {
+			free(data_);
 		}
 	}
 
 	size_t size() const {
-		return size;
+		return size_;
 	}
 
 	size_t capacity() const {
-		return capacity;
+		return capacity_;
 	}
 
-	void setCapacity(size_t _capacity) {
-		capacity = capacity;
+	void setCapacity(size_t capacity) {
+		capacity_ = capacity;
 		errno = 0;
-		data = reinterpret_cast<T*>(
-			realloc(data, capacity * sizeof(T)));
+		data_ = reinterpret_cast<T*>(
+			realloc(data_, capacity_ * sizeof(T)));
 		if (errno) {
 			THROW_SYSTEM_ERROR();
 		}
 	}
 
-	void append(const T *src, size_t _size) {
-		if (capacity < size + _size) {
-			setCapacity(capacity + size);
+	void append(const T *src, size_t size) {
+		if (capacity_ < size_ + size) {
+			setCapacity(capacity_ + size);
 		}
 
-		if (src >= data && src < data + capacity) {
+		if (src >= data_ && src < data_ + capacity_) {
 			_E("src and dst do ovelap")
 		}
-		memcpy(data + size, src, _size);
+		memcpy(data_ + size_, src, size);
 
-		size += _size;
+		size_ += size;
 	}
 
 	void drain(size_t n) {
 		if (n == 0)
 			return;
 
-		if (n > size) {
+		if (n > size_) {
 			THROW("not enough data");
 		}
 
-		size_t count = size - n;
-		T *ptr1 = data;
-		T *ptr2 = data + n;
+		size_t count = size_ - n;
+		T *ptr1 = data_;
+		T *ptr2 = data_ + n;
 
 		while (count) {
 			size_t count2 = std::min(n, count);
@@ -79,17 +79,17 @@ public:
 			count -= count2;
 		}
 
-		size -= n;
+		size_ -= n;
 	}
 
 	const T* data() {
-		return data;
+		return data_;
 	}
 
 private:
-	T* data;
-	size_t capacity;
-	size_t size;
+	T* data_;
+	size_t capacity_;
+	size_t size_;
 };
 
 #endif /* __BUFFER_H__ */

@@ -56,7 +56,7 @@ private:
 	std::string host;
 	uint16_t port;
 	Buffer<uint8_t> writeBuffer;
-	bool needToWrite;
+	bool needToWrite_;
 };
 
 #endif

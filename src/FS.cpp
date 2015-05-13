@@ -26,28 +26,23 @@ File::~File() {
 
 }
 
-bool File::isRegular() const 
-{
+bool File::isRegular() const {
 	return S_ISREG(stat_.st_mode);
 }
 
-bool File::isDir() const 
-{
+bool File::isDir() const {
 	return S_ISDIR(stat_.st_mode);
 }
 
-size_t File::size() const
-{
+size_t File::size() const {
 	return stat_.st_size;
 }
 	
-const std::string& File::path() const
-{
+const std::string& File::path() const {
 	return path_;
 }
 	
-const std::string& File::name() const
-{
+const std::string& File::name() const {
 	return name_;
 }
 

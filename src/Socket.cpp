@@ -23,11 +23,10 @@ Socket::Socket() : needToWrite_(false) {
 }
 
 Socket::Socket(Socket&& rhs) : 
-sockfd(std::move(rhs.sockfd)), 
-addr(rhs.addr), 
-host(rhs.host), 
-port(rhs.port)
-{
+		sockfd(std::move(rhs.sockfd)), 
+		addr(rhs.addr), 
+		host(rhs.host), 
+		port(rhs.port) {
 	rhs.sockfd = 0;
 }
 
@@ -112,7 +111,7 @@ size_t Socket::write() {
 		writeBuffer.drain(ret);
 	}
 
-	needToWrite = !!writeBuffer.size();
+	needToWrite_ = !!writeBuffer.size();
 
 	return writeBuffer.size();
 }
@@ -122,7 +121,7 @@ int Socket::native() {
 }
 
 bool Socket::needToWrite() const {
-	return needToWrite;
+	return needToWrite_;
 }
 
 Socket::Socket(int fd) : sockfd(fd) {
