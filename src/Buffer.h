@@ -92,4 +92,4 @@ private:
 	size_t size_;
 };
 
-#endif /* __BUFFER_H__ */
+#endif

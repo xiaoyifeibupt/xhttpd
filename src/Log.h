@@ -40,4 +40,4 @@ do { \
 	throw std::runtime_error(msg);\
 } while (0)
 
-#endif /* __LOG_H__ */
+#endif

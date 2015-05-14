@@ -27,24 +27,25 @@ public:
 	const std::string& name() const;
 
 	template<typename T>
-	void content(Buffer<T>& buffer)
-	{
+	void content(Buffer<T>& buffer) {
+		
 		if (fd_ < 0) {
+			
 			errno = -fd_;
 			THROW_SYSTEM_ERROR();
 		}
 
-		if (lseek(fd_, SEEK_SET, 0) == -1)
-		{
+		if (lseek(fd_, SEEK_SET, 0) == -1) {
+			
 			THROW_SYSTEM_ERROR();
 		}
 
 		T tmpBuf[1024 * 10];
 		int ret = read(fd_, tmpBuf, sizeof(tmpBuf));
-		while (ret)
-		{
-			if (ret == -1)
-			{
+		while (ret) {
+			
+			if (ret == -1) {
+				
 				THROW_SYSTEM_ERROR();
 			}
 

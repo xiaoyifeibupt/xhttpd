@@ -22,10 +22,10 @@ public:
 	virtual int process(HttpRequest& req, SocketPtr sock) = 0;
 	virtual bool isEligible(const HttpRequest& req) const = 0;
 
-	std::string StatusToStr(HttpStatus status)
-	{
-		switch (status)
-		{
+	std::string StatusToStr(HttpStatus status) {
+		
+		switch (status) {
+			
 		case OK:
 			return "OK";
 		case FORBIDDEN:
@@ -34,15 +34,17 @@ public:
 			return "Not found";
 		case INTERNAL_ERROR:
 			return "Internal Server Error";
+			
 		}
 
 		return "Internal Server Error";
 	}
 
 	void makeHttpResponse(HttpRequest& req, const char *content, size_t size,
-		Buffer<uint8_t>& buffer, HttpStatus status = OK)
-	{
+		Buffer<uint8_t>& buffer, HttpStatus status = OK) {
+
 		std::stringstream ss;
+		
 		ss << "HTTP/" << req.versionToStr() << " " << status <<
 			StatusToStr(status) << "\nContent-Length:" <<
 			size << "\n\n";

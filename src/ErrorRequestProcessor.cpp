@@ -2,13 +2,12 @@
 
 #include "ErrorRequestProcessor.h"
 
-ErrorRequestProcessor::ErrorRequestProcessor()
-{
+ErrorRequestProcessor::ErrorRequestProcessor() {
 
 }
 
-int ErrorRequestProcessor::process(HttpRequest& req, SocketPtr sock)
-{
+int ErrorRequestProcessor::process(HttpRequest& req, SocketPtr sock) {
+	
 	std::string content;
 	HttpStatus status;
 
@@ -29,8 +28,7 @@ int ErrorRequestProcessor::process(HttpRequest& req, SocketPtr sock)
 	
 	makeHttpResponse(req, content.data(), content.size(), buffer, status);
 
-	if (sock->write(buffer.data(), buffer.size()) == 0)
-	{
+	if (sock->write(buffer.data(), buffer.size()) == 0) {
 		return -1;
 	}
 
@@ -38,13 +36,11 @@ int ErrorRequestProcessor::process(HttpRequest& req, SocketPtr sock)
 	return 0;
 }
 
-bool ErrorRequestProcessor::isEligible(const HttpRequest& req) const
-{
+bool ErrorRequestProcessor::isEligible(const HttpRequest& req) const {
 	(void)req;
 	return true;
 }
 
-void ErrorRequestProcessor::setLastErrorCode(int code)
-{
+void ErrorRequestProcessor::setLastErrorCode(int code) {
 	code_ = code;
 }

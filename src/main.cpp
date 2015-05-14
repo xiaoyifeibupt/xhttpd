@@ -1,11 +1,11 @@
 #include <iostream>
 
 #include "FSRequestProcessor.h"
-#include "Server.h"
+#include "xhttpdServer.h"
 
 int main()
 {
-	ServerPtr server = std::make_shared<Server>(8080, 10);
+	xhttpdServerPtr server = std::make_shared<xhttpdServer>(8080);
 
 
 	server->addReqProcessor(

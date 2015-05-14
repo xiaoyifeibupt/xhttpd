@@ -2,14 +2,13 @@
 #include "FS.h"
 #include "FSRequestProcessor.h"
 
-FSRequestProcessor::FSRequestProcessor()
-{
+FSRequestProcessor::FSRequestProcessor() {
 
 }
 
 void FSRequestProcessor::fileContent(HttpRequest& req,
-	FS::File& file, Buffer<uint8_t>& buffer)
-{
+				FS::File& file, Buffer<uint8_t>& buffer) {
+		
 	Buffer<char> content;
 	/*
 	 * TODO: it's will be better to make cache to avoid reading every time.
@@ -21,8 +20,8 @@ void FSRequestProcessor::fileContent(HttpRequest& req,
 }
 
 void FSRequestProcessor::dirContent(HttpRequest& req,
-	FS::File& file, Buffer<uint8_t>& buffer)
-{
+				FS::File& file, Buffer<uint8_t>& buffer) {
+		
 	FS::Directory dir(file.path());
 
 	std::stringstream ss;
@@ -30,8 +29,8 @@ void FSRequestProcessor::dirContent(HttpRequest& req,
 
 	ss << "<table>";
 
-	while ((f = dir.nextFile()))
-	{
+	while ((f = dir.nextFile())) {
+		
 		ss << "<tr><td><a href='" << f->name() <<
 			(f->isDir() ? "/" : "") << "'>" << f->name() <<
 			"</a></td><td>" << f->size() << "</td></tr>";
@@ -43,8 +42,8 @@ void FSRequestProcessor::dirContent(HttpRequest& req,
 	makeHttpResponse(req, content.data(), content.size(), buffer);
 }
 
-int FSRequestProcessor::process(HttpRequest& req, SocketPtr sock)
-{
+int FSRequestProcessor::process(HttpRequest& req, SocketPtr sock) {
+	
 	const std::string path = std::string(".") + req.path;
 	FS::File file(path, path);
 
@@ -56,16 +55,16 @@ int FSRequestProcessor::process(HttpRequest& req, SocketPtr sock)
 		dirContent(req, file, buffer);
 	}
 
-	if (sock->write(buffer.data(), buffer.size()) == 0)
-	{
+	if (sock->write(buffer.data(), buffer.size()) == 0) {
+		
 		return -1;
 	}
 
 	return 0;
 }
 
-bool FSRequestProcessor::isEligible(const HttpRequest& req) const
-{
+bool FSRequestProcessor::isEligible(const HttpRequest& req) const {
+	
 	(void)req;
 	return true;
 }

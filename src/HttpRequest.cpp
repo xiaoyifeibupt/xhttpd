@@ -2,8 +2,8 @@
 
 #include "HttpRequest.h"
 
-HttpRequest::HttpRequest(const std::string& req)
-{
+HttpRequest::HttpRequest(const std::string& req) {
+	
 	hdr["Host"] = "";
 	hdr["User-Agent"] = "";
 	hdr["Connection"] = "";
@@ -11,8 +11,8 @@ HttpRequest::HttpRequest(const std::string& req)
 	parse(req);
 }
 
-std::string HttpRequest::versionToStr() const
-{
+std::string HttpRequest::versionToStr() const {
+	
 	if (version == Version::v1_1) {
 		return "1.1";
 	}
@@ -22,14 +22,15 @@ std::string HttpRequest::versionToStr() const
 }
 
 /* TODO: it's very ugly parsing. Need to optimize it for more methods/header/...*/
-int HttpRequest::parse(const std::string& req)
-{
+int HttpRequest::parse(const std::string& req) {
+	
 	size_t pos = 0;
 
 	if (req.substr(pos, 3) == "GET") {
 		method = Method::GET;
 		pos += 4;
-	} else {
+	}
+	else {
 		return -1;
 	}
 
@@ -50,16 +51,17 @@ int HttpRequest::parse(const std::string& req)
 		return -3;
 	}
 
-	for (auto it = hdr.begin(); it != hdr.end(); ++it)
-	{
+	for (auto it = hdr.begin(); it != hdr.end(); ++it) {
+		
 		const std::string& hdr = it->first;
 		size_t pos = req.find(hdr);
 
 		pos += hdr.size() + 2;
 		size_t end = req.find("\n", pos);
 		std::string value = req.substr(pos, end - pos - 1);
-		if (value.back() == '\r')
-		{
+		
+		if (value.back() == '\r') {
+			
 			value.erase(value.size() - 1, 1);
 		}
 
