@@ -10,7 +10,7 @@ class FSRequestProcessor : public RequestProcessor
 public:
 	FSRequestProcessor();
 
-	int process(HttpRequest& req, SocketPtr sock) override;
+	void process(HttpRequest& req, Buffer<uint8_t>& buffer) override;
 	bool isEligible(const HttpRequest& req) const override;
 
 private:

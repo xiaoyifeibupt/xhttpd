@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "HttpRequest.h"
-#include "Socket.h"
+#include "Buffer.h"
 
 class RequestProcessor
 {
@@ -19,7 +19,7 @@ public:
 
 	RequestProcessor() { };
 
-	virtual int process(HttpRequest& req, SocketPtr sock) = 0;
+	virtual void process(HttpRequest& req, Buffer<uint8_t>& buffer) = 0;
 	virtual bool isEligible(const HttpRequest& req) const = 0;
 
 	std::string StatusToStr(HttpStatus status) {

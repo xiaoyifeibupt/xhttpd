@@ -30,8 +30,6 @@ public:
 	virtual ~xhttpdServer();
 	
 	void start();
-
-	int handler(SocketPtr sock, int x);
 	
 	void addReqProcessor(RequestProcessorPtr processor);
 

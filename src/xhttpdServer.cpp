@@ -46,6 +46,7 @@ void xhttpdServer::start() {
 		for (int i = 0; i < nfds; ++i) {
 			
 			if(events.get()[i].data.fd == listener_.native()) {
+
 				SocketPtr s = listener_.accept();
 				
 				handlers_[s -> native()] = s;
@@ -57,67 +58,65 @@ void xhttpdServer::start() {
 				if (ret != 0) {
 					THROW_SYSTEM_ERROR();
 				}
+				
 			}
-			else if (events.get()[i].events & EPOLLIN) {
-				if (handler(handlers_[events.get()[i].data.fd], 0) < 0) {						
+			else if (events.get()[i].events & EPOLLIN) {				
+				Buffer<uint8_t> buf;
+				
+				SocketPtr sock = handlers_[events.get()[i].data.fd];
+
+				sock->read(buf);
+								
+				std::string requestStr(
+					reinterpret_cast<const char*>(buf.data()), buf.size());
+
+				HttpRequest request(requestStr);
+
+				if (buf.size() == 0) {						
 					handlers_.erase(events.get()[i].data.fd);
 					continue;
 				}
-			}else if (events.get()[i].events & EPOLLOUT) {
-				if (handler(handlers_[events.get()[i].data.fd], 1) < 0) {						
-					handlers_.erase(events.get()[i].data.fd);
-					continue;
-				}
-			}
-		}
-	}
-}
-
-int xhttpdServer::handler(SocketPtr sock, int x) {
-	
-	if (x == 0) {
-		
-		Buffer<uint8_t> buf;
-
-		sock->read(buf);
-		
-		std::string requestStr(
-			reinterpret_cast<const char*>(buf.data()), buf.size());
-
-		HttpRequest request(requestStr);
-
-		if (buf.size() == 0)
-			return -1;
-
-		for (auto it = processors_.begin(); it != processors_.end(); ++it) {
+				for (auto it = processors_.begin(); it != processors_.end(); ++it) {
 			
-			if ((*it)->isEligible(request)) {
-
-				try {
-					return (*it)->process(request, sock);
-				} catch (std::system_error& e) {
-					
-					
-					ErrorRequestProcessor ep;
-					ep.setLastErrorCode(e.code().value());
-					ep.process(request, sock);
-
-					_E(e.what());
-					return -1;
+					if ((*it)->isEligible(request)) {
+						Buffer<uint8_t> buffer;
+		
+						try {							
+							(*it)->process(request, buffer);
+						} catch (std::system_error& e) {
+														
+							ErrorRequestProcessor ep;
+							ep.setLastErrorCode(e.code().value());
+							ep.process(request, buffer);		
+							_E(e.what());
+							
+							handlers_.erase(events.get()[i].data.fd);
+							continue;
+						}
+												
+						ev_.data.ptr = &buffer;
+						ev_.data.fd = sock -> native();
+						ev_.events = EPOLLOUT|EPOLLET;
+               			epoll_ctl(epfd_, EPOLL_CTL_MOD, sock -> native(), &ev_);
+					}
 				}
+				
+			}else if (events.get()[i].events & EPOLLOUT) {
+				_I(nfds);
+
+				Buffer<uint8_t> *buffer = (Buffer<uint8_t> *)(events.get()[i].data.ptr);
+				SocketPtr sock = handlers_[events.get()[i].data.fd];
+				sock -> write(buffer -> data(), buffer -> size());
+				
+				ev_.data.fd = sock -> native();
+            	ev_.events=EPOLLIN|EPOLLET;
+            	epoll_ctl(epfd_, EPOLL_CTL_MOD, sock -> native(), &ev_); 
 			}
 		}
-
-		return -1;
 	}
-	else if (x == 1) {
-		
-		if (sock->needToWrite() && sock->write() == 0)
-			return -1;
-	}
-
-	return 0;
 }
+
+
 
 void xhttpdServer::addReqProcessor(RequestProcessorPtr processor) {
 	

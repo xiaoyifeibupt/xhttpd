@@ -6,7 +6,7 @@ ErrorRequestProcessor::ErrorRequestProcessor() {
 
 }
 
-int ErrorRequestProcessor::process(HttpRequest& req, SocketPtr sock) {
+void ErrorRequestProcessor::process(HttpRequest& req, Buffer<uint8_t>& buffer) {
 	
 	std::string content;
 	HttpStatus status;
@@ -23,17 +23,11 @@ int ErrorRequestProcessor::process(HttpRequest& req, SocketPtr sock) {
 	}
 
 	content += req.path;
-
-	Buffer<uint8_t> buffer;
 	
 	makeHttpResponse(req, content.data(), content.size(), buffer, status);
-
-	if (sock->write(buffer.data(), buffer.size()) == 0) {
-		return -1;
-	}
-
+	
 	(void)req;
-	return 0;
+
 }
 
 bool ErrorRequestProcessor::isEligible(const HttpRequest& req) const {

@@ -42,12 +42,10 @@ void FSRequestProcessor::dirContent(HttpRequest& req,
 	makeHttpResponse(req, content.data(), content.size(), buffer);
 }
 
-int FSRequestProcessor::process(HttpRequest& req, SocketPtr sock) {
+void FSRequestProcessor::process(HttpRequest& req, Buffer<uint8_t>& buffer) {
 	
 	const std::string path = std::string(".") + req.path;
 	FS::File file(path, path);
-
-	Buffer<uint8_t> buffer;
 
 	if (file.isRegular()) {
 		fileContent(req, file, buffer);
@@ -55,12 +53,7 @@ int FSRequestProcessor::process(HttpRequest& req, SocketPtr sock) {
 		dirContent(req, file, buffer);
 	}
 
-	if (sock->write(buffer.data(), buffer.size()) == 0) {
-		
-		return -1;
-	}
-
-	return 0;
+	
 }
 
 bool FSRequestProcessor::isEligible(const HttpRequest& req) const {
