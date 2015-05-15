@@ -20,6 +20,7 @@ public:
 	};
 
 	HttpRequest(const std::string& req);
+	
 	std::string versionToStr() const;
 
 	Version version;
