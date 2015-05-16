@@ -1,4 +1,11 @@
-#include <limits>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <string.h>
+#include <sys/ioctl.h>
+#include <unistd.h>
+
+#include <tuple>
 
 #include "ErrorRequestProcessor.h"
 #include "HttpRequest.h"
@@ -32,6 +39,8 @@ xhttpdServer::~xhttpdServer() {
 
 void xhttpdServer::start() {
 	
+	Buffer<uint8_t> BUFFer;
+	
 	_I("Server started at 0.0.0.0:" << port_);
 	
 	auto events = UNIQ_MEM_PTR(struct epoll_event, kMaxEvents, free);
@@ -48,7 +57,7 @@ void xhttpdServer::start() {
 			if(events.get()[i].data.fd == listener_.native()) {
 
 				SocketPtr s = listener_.accept();
-				
+				s -> makeNonBlocking();
 				handlers_[s -> native()] = s;
 				
 				ev_.events = EPOLLIN | EPOLLET;
@@ -66,7 +75,8 @@ void xhttpdServer::start() {
 				SocketPtr sock = handlers_[events.get()[i].data.fd];
 
 				sock->read(buf);
-								
+				_I(buf.data());
+			
 				std::string requestStr(
 					reinterpret_cast<const char*>(buf.data()), buf.size());
 
@@ -81,8 +91,10 @@ void xhttpdServer::start() {
 					if ((*it)->isEligible(request)) {
 						Buffer<uint8_t> buffer;
 		
-						try {							
+						try {			
+											
 							(*it)->process(request, buffer);
+							
 						} catch (std::system_error& e) {
 														
 							ErrorRequestProcessor ep;
@@ -93,23 +105,31 @@ void xhttpdServer::start() {
 							handlers_.erase(events.get()[i].data.fd);
 							continue;
 						}
-												
-						ev_.data.ptr = &buffer;
-						ev_.data.fd = sock -> native();
-						ev_.events = EPOLLOUT|EPOLLET;
+						
+						BUFFer = buffer;
+
+						fd_data FAin(sock -> native(),buffer);						
+						ev_.data.ptr = (void*) &FAin;
+				
+						ev_.events = EPOLLOUT | EPOLLET;
+
                			epoll_ctl(epfd_, EPOLL_CTL_MOD, sock -> native(), &ev_);
 					}
 				}
 				
 			}else if (events.get()[i].events & EPOLLOUT) {
-				_I(nfds);
 
-				Buffer<uint8_t> *buffer = (Buffer<uint8_t> *)(events.get()[i].data.ptr);
-				SocketPtr sock = handlers_[events.get()[i].data.fd];
-				sock -> write(buffer -> data(), buffer -> size());
+				fd_data *FAout = (fd_data *)events.get()[i].data.ptr;
+
+//				Buffer<uint8_t> buffer = FAout -> getdata();
+
+				SocketPtr sock = handlers_[FAout -> getfd()];
+//				sock -> write(BUFFer.data(), BUFFer.size());
 				
+				write(sock -> native(),BUFFer.data(), BUFFer.size());
+
 				ev_.data.fd = sock -> native();
-            	ev_.events=EPOLLIN|EPOLLET;
+            	ev_.events = EPOLLIN | EPOLLET;
             	epoll_ctl(epfd_, EPOLL_CTL_MOD, sock -> native(), &ev_); 
 			}
 		}

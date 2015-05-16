@@ -8,6 +8,7 @@
 
 #include "Socket.h"
 #include "RequestProcessor.h"
+#include "Buffer.h"
 
 
 static const size_t kMaxEvents = 1 << 16;
@@ -20,6 +21,24 @@ static std::unique_ptr<T, D> __memBlock(size_t size, D deleter) {
 }
 
 #define UNIQ_MEM_PTR(T, size, D) __memBlock<T, decltype(&D)>(size, &D)
+
+class fd_data {
+public:
+	fd_data(int fdxx_, Buffer<uint8_t>& dataxx_) : fdxx(fdxx_){
+		dataxx.append(dataxx_.data(),dataxx_.size());
+	}
+	~fd_data() {}
+	int getfd() {
+		return fdxx;
+	}
+	Buffer<uint8_t> getdata() {
+		return dataxx;
+	}
+private:
+	int fdxx;
+	Buffer<uint8_t> dataxx;
+
+};
 
 class xhttpdServer : public std::enable_shared_from_this<xhttpdServer>
 {
@@ -47,7 +66,6 @@ private:
 	
 	std::map<int, SocketPtr> handlers_;
 	
-//	std::shared_ptr<std::thread> thread_;
 	
 };
 typedef std::shared_ptr<xhttpdServer> xhttpdServerPtr;

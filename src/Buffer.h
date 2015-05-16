@@ -21,6 +21,12 @@ public:
 		}
 	}
 
+	Buffer(Buffer& bu) {
+		data_ = bu.data_;
+		capacity_ = bu.capacity_;
+		size_ = bu.size_;
+	}
+
 	~Buffer() {
 		if (data_) {
 			free(data_);
