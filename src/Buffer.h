@@ -57,7 +57,7 @@ public:
 		}
 
 		if (src >= data_ && src < data_ + capacity_) {
-			_E("src and dst do ovelap")
+			_E("src and dst do ovelap");
 		}
 		memcpy(data_ + size_, src, size);
 

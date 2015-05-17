@@ -93,10 +93,23 @@ void Socket::read(Buffer<uint8_t>& buffer) {
 	}
 }
 
-size_t Socket::write(const uint8_t *buf, size_t size) {
+void Socket::write(const uint8_t *buf, size_t size) {
 	writeBuffer.append(buf, size);
 
-	return write();
+//	return write();
+	int ret = 0;
+
+	while(writeBuffer.size() - ret) {
+		ret = ::write(sockfd, writeBuffer.data(), writeBuffer.size());
+		if (ret == -1) {
+			if (errno != EAGAIN && errno != EWOULDBLOCK) {
+				_E("Can't write to socket. Socket will be closed");
+			}
+		} else {
+			writeBuffer.drain(ret);
+		}
+	}
+
 }
 
 size_t Socket::write() {

@@ -22,21 +22,22 @@ static std::unique_ptr<T, D> __memBlock(size_t size, D deleter) {
 
 #define UNIQ_MEM_PTR(T, size, D) __memBlock<T, decltype(&D)>(size, &D)
 
-class fd_data {
+class packFdData {
 public:
-	fd_data(int fdxx_, Buffer<uint8_t>& dataxx_) : fdxx(fdxx_){
-		dataxx.append(dataxx_.data(),dataxx_.size());
+	packFdData(int fd, Buffer<uint8_t>& data) : fdno(fd){
+		bu_data.append(data.data(),data.size());
 	}
-	~fd_data() {}
+
+	~packFdData() {}
 	int getfd() {
-		return fdxx;
+		return fdno;
 	}
-	Buffer<uint8_t> getdata() {
-		return dataxx;
+	void getdata(Buffer<uint8_t> &buf) {
+		buf.append(bu_data.data(),bu_data.size());
 	}
 private:
-	int fdxx;
-	Buffer<uint8_t> dataxx;
+	int fdno;
+	Buffer<uint8_t> bu_data;
 
 };
 

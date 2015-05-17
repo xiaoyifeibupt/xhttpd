@@ -37,7 +37,7 @@ public:
 	void read(Buffer<uint8_t>& buffer);
 	
 	
-	size_t write(const uint8_t *buf, size_t size);
+	void write(const uint8_t *buf, size_t size);
 	size_t write();
 	
 	int native();
