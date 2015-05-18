@@ -44,6 +44,8 @@ public:
 	bool error();
 	bool needToWrite() const;
 
+	void close(int fd);
+
 	friend bool operator==(SocketPtr lhs, int rhs);
 
 private:

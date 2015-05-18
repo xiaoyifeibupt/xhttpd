@@ -10,10 +10,7 @@ void FSRequestProcessor::fileContent(HttpRequest& req,
 				FS::File& file, Buffer<uint8_t>& buffer) {
 		
 	Buffer<char> content;
-	/*
-	 * TODO: it's will be better to make cache to avoid reading every time.
-	 * Posible to use inotify to get event when file should be reloaded
-	 */
+
 	file.content(content);
 
 	makeHttpResponse(req, content.data(), content.size(), buffer);
@@ -43,16 +40,34 @@ void FSRequestProcessor::dirContent(HttpRequest& req,
 }
 
 void FSRequestProcessor::process(HttpRequest& req, Buffer<uint8_t>& buffer) {
-	
-	const std::string path = std::string(".") + req.path;
-	FS::File file(path, path);
+	if(req.path =="/" || req.path =="/index.html") {
 
-	if (file.isRegular()) {
-		fileContent(req, file, buffer);
-	} else if (file.isDir()) {
-		dirContent(req, file, buffer);
+		const std::string path = std::string("../html/index.html");
+
+		FS::File file(path, path);
+		fileContent(req, file, buffer);				
+
 	}
+	else if(req.path =="/favicon.ico") {
 
+		const std::string path = std::string("../html/favicon.ico");
+		FS::File file(path, path);
+
+		fileContent(req, file, buffer);
+	}
+	else {
+
+		const std::string path = std::string(".") + req.path;
+		FS::File file(path, path);
+
+		if (file.isRegular()) {
+			fileContent(req, file, buffer);
+		} else if (file.isDir()) {
+			dirContent(req, file, buffer);
+		}
+
+	}
+	
 	
 }
 

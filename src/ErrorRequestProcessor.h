@@ -2,6 +2,7 @@
 #define __ERROR_REQUEST_PROCESSOR__
 
 #include "Buffer.h"
+#include "FS.h"
 #include "RequestProcessor.h"
 
 class ErrorRequestProcessor : public RequestProcessor

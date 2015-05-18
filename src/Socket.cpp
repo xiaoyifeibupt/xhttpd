@@ -96,7 +96,6 @@ void Socket::read(Buffer<uint8_t>& buffer) {
 void Socket::write(const uint8_t *buf, size_t size) {
 	writeBuffer.append(buf, size);
 
-//	return write();
 	int ret = 0;
 
 	while(writeBuffer.size() - ret) {
@@ -110,6 +109,13 @@ void Socket::write(const uint8_t *buf, size_t size) {
 		}
 	}
 
+}
+
+/*
+size_t Socket::write(const uint8_t *buf, size_t size) {
+	writeBuffer_.append(buf, size);
+
+	return write();
 }
 
 size_t Socket::write() {
@@ -128,6 +134,7 @@ size_t Socket::write() {
 
 	return writeBuffer.size();
 }
+*/
 
 int Socket::native() {
 	return sockfd;
@@ -141,7 +148,9 @@ Socket::Socket(int fd) : sockfd(fd) {
 
 }
 
-
+void Socket::close(int fd) {
+	::close(fd);
+}
 bool Socket::error() {
 	int optval;
 	socklen_t optlen;

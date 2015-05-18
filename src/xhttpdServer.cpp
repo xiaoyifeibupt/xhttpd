@@ -1,3 +1,5 @@
+#include <system_error>
+
 #include "ErrorRequestProcessor.h"
 #include "HttpRequest.h"
 #include "xhttpdServer.h"
@@ -31,7 +33,7 @@ xhttpdServer::~xhttpdServer() {
 
 void xhttpdServer::start() {
 	
-	Buffer<uint8_t> BUFFer;
+	Buffer<uint8_t> responseStr;
 	
 	_I("Server started at 0.0.0.0:" << port_);
 	
@@ -84,7 +86,7 @@ void xhttpdServer::start() {
 					if (ret != 0) {
 						THROW_SYSTEM_ERROR();
 					}						
-					
+					sock -> close(sock -> native());
 					continue;
 				}
 				for (auto it = processors_.begin(); it != processors_.end(); ++it) {
@@ -94,32 +96,49 @@ void xhttpdServer::start() {
 		
 						try {			
 											
-							(*it)->process(request, buffer);
-							sock -> write(buffer.data(), buffer.size());
-							
-						} catch (std::system_error& e) {
+								(*it)->process(request, buffer);
+
+								if(buffer.size() > 0)
+									sock -> write(buffer.data(), buffer.size());
+								
+							} 
+						catch (std::system_error& e) {
 														
 							ErrorRequestProcessor ep;
 							ep.setLastErrorCode(e.code().value());
-							ep.process(request, buffer);		
+							ep.process(request, buffer);
+
+							if(buffer.size() > 0)
+								sock -> write(buffer.data(), buffer.size());		
 							_E(e.what());
 							
 							handlers_.erase(events.get()[i].data.fd);
+
+							ev_.events = 0;
+							ev_.data.fd = events.get()[i].data.fd;
+	
+							int ret = epoll_ctl(epfd_, EPOLL_CTL_DEL, events.get()[i].data.fd, &ev_);
+							if (ret != 0) {
+								THROW_SYSTEM_ERROR();
+							}						
+							
+							sock -> close(sock -> native());
 							continue;
 						}
 						
-						BUFFer = buffer;
+//						responseStr = buffer;
+//						ev_.data.fd = sock -> native();
 
 //						packFdData pfd(sock -> native(),buffer);						
 //						ev_.data.ptr = (void*) &pfd;
 //						packFdData *pfdptr = (packFdData *)ev_.data.ptr;
 
-						ev_.data.ptr = (void*) &buffer;
-						Buffer<uint8_t> *buffptr = (Buffer<uint8_t> *)ev_.data.ptr;
+//						ev_.data.ptr = (void*) &buffer;
+//						Buffer<uint8_t> *buffptr = (Buffer<uint8_t> *)ev_.data.ptr;
 						
 //						ev_.events = EPOLLOUT | EPOLLET;
 
-//               			epoll_ctl(epfd_, EPOLL_CTL_MOD, sock -> native(), &ev_);
+//						epoll_ctl(epfd_, EPOLL_CTL_MOD, sock -> native(), &ev_);
 					}
 				}
 				
@@ -127,14 +146,14 @@ void xhttpdServer::start() {
 
 //				packFdData *pfdptr = (packFdData *)events.get()[i].data.ptr;
 
-				Buffer<uint8_t> *bufferptr = (Buffer<uint8_t> *)events.get()[i].data.ptr;
+//				Buffer<uint8_t> *bufferptr = (Buffer<uint8_t> *)events.get()[i].data.ptr;
 				
 //				SocketPtr sock = handlers_[events.get()[i].data.fd];
-//
-//				sock -> write(buffer.data(), buffer.size());
+
+//				sock -> write(responseStr.data(), responseStr.size());
 
 //				ev_.data.fd = sock -> native();
-            	ev_.events = EPOLLIN | EPOLLET;
+//            	ev_.events = EPOLLIN | EPOLLET;
 //            	epoll_ctl(epfd_, EPOLL_CTL_MOD, sock -> native(), &ev_); 
 			}
 		}
