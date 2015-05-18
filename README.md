@@ -1,2 +1,26 @@
-# myhttpd
-I want to implement a Simple multi-thread http server by C++ for practicing
+# xhttpd
+
+`xhttpd`是一个简单高效的http server，C++语言开发，为了练习所学的一些知识：http 协议、网络编程、I/O福永，多线程以及C++ 11新特性。
+
+##开发记录
+
+-	2015.5.18
+-	2015.5.1
+
+
+
+
+##功能
+
+-	支持GET
+-	支持文件和目录的访问
+-	非阻塞I/O
+-	epoll
+-	支持403,404,500
+
+
+
+##性能测试
+
+
+
