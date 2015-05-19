@@ -16,7 +16,7 @@ public:
 
 	enum class Method
 	{
-		GET,
+		GET,POST
 	};
 
 	HttpRequest(const std::string& req);

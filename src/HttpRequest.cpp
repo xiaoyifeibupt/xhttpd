@@ -30,6 +30,10 @@ int HttpRequest::parse(const std::string& req) {
 		method = Method::GET;
 		pos += 4;
 	}
+	else if (req.substr(pos, 3) == "POST") {
+		method = Method::POST;
+		pos += 4;
+	}
 	else {
 		return -1;
 	}

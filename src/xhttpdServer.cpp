@@ -49,36 +49,45 @@ void xhttpdServer::start() {
 		for (int i = 0; i < nfds; ++i) {
 			
 			if(events.get()[i].data.fd == listener_.native()) {
+				_I("acceptbefore");
 
-				SocketPtr s = listener_.accept();
-				s -> makeNonBlocking();
-				handlers_[s -> native()] = s;
-				
-				ev_.events = EPOLLIN | EPOLLET;
-				ev_.data.fd = s -> native();
-	
-				int ret = epoll_ctl(epfd_, EPOLL_CTL_ADD, s -> native(), &ev_);
-				if (ret != 0) {
-					THROW_SYSTEM_ERROR();
+				int socketfd;
+				while((socketfd = listener_.accept()) > 0) {
+					_I("accept");
+					Socket sock(socketfd);
+					sock.makeNonBlocking();
+					
+					ev_.events = EPOLLIN | EPOLLET;
+					ev_.data.fd = socketfd;
+		
+					int ret = epoll_ctl(epfd_, EPOLL_CTL_ADD, socketfd, &ev_);
+					if (ret != 0) {
+						THROW_SYSTEM_ERROR();
+					}							
 				}
-				
+				if(socketfd == -1) {
+					if (errno != EAGAIN && errno != ECONNABORTED 
+                            && errno != EPROTO && errno != EINTR)
+						THROW_SYSTEM_ERROR();
+				}
+				continue;
 			}
-			else if (events.get()[i].events & EPOLLIN) {				
+			else if (events.get()[i].events & EPOLLIN) {
+				_I("in");				
 				Buffer<uint8_t> buf;
 				
-				SocketPtr sock = handlers_[events.get()[i].data.fd];
+				Socket sock(events.get()[i].data.fd);
 
-				sock->read(buf);
-				_I(buf.data());
+//				sock.read(buf);
+				
 			
 				std::string requestStr(
 					reinterpret_cast<const char*>(buf.data()), buf.size());
 
 				HttpRequest request(requestStr);
 
-				if (buf.size() == 0) {
-					handlers_.erase(events.get()[i].data.fd);
-
+				if (!(request.method == HttpRequest::Method::GET || request.method == HttpRequest::Method::POST)) {
+					
 					ev_.events = 0;
 					ev_.data.fd = events.get()[i].data.fd;
 	
@@ -86,9 +95,12 @@ void xhttpdServer::start() {
 					if (ret != 0) {
 						THROW_SYSTEM_ERROR();
 					}						
-					sock -> close(sock -> native());
+					sock.close(events.get()[i].data.fd);
+					
 					continue;
 				}
+
+				_I(buf.data());
 				for (auto it = processors_.begin(); it != processors_.end(); ++it) {
 			
 					if ((*it)->isEligible(request)) {
@@ -98,8 +110,18 @@ void xhttpdServer::start() {
 											
 								(*it)->process(request, buffer);
 
-								if(buffer.size() > 0)
-									sock -> write(buffer.data(), buffer.size());
+								packFdData *pfdptr = (packFdData*)malloc(sizeof(packFdData));
+								pfdptr -> fdno = events.get()[i].data.fd;
+								pfdptr -> bu_data = buffer.data();
+								pfdptr -> bu_size = buffer.size();
+
+								ev_.data.ptr = (void*) pfdptr;
+								ev_.events = EPOLLOUT | EPOLLET;
+
+								int ret = epoll_ctl(epfd_, EPOLL_CTL_MOD, events.get()[i].data.fd, &ev_);
+								if (ret != 0) {
+									THROW_SYSTEM_ERROR();
+								}
 								
 							} 
 						catch (std::system_error& e) {
@@ -109,11 +131,9 @@ void xhttpdServer::start() {
 							ep.process(request, buffer);
 
 							if(buffer.size() > 0)
-								sock -> write(buffer.data(), buffer.size());		
+								sock.write(buffer.data(), buffer.size());		
 							_E(e.what());
 							
-							handlers_.erase(events.get()[i].data.fd);
-
 							ev_.events = 0;
 							ev_.data.fd = events.get()[i].data.fd;
 	
@@ -122,39 +142,46 @@ void xhttpdServer::start() {
 								THROW_SYSTEM_ERROR();
 							}						
 							
-							sock -> close(sock -> native());
+							sock.close(events.get()[i].data.fd);
 							continue;
-						}
-						
-//						responseStr = buffer;
-//						ev_.data.fd = sock -> native();
-
-//						packFdData pfd(sock -> native(),buffer);						
-//						ev_.data.ptr = (void*) &pfd;
-//						packFdData *pfdptr = (packFdData *)ev_.data.ptr;
-
-//						ev_.data.ptr = (void*) &buffer;
-//						Buffer<uint8_t> *buffptr = (Buffer<uint8_t> *)ev_.data.ptr;
-						
-//						ev_.events = EPOLLOUT | EPOLLET;
-
-//						epoll_ctl(epfd_, EPOLL_CTL_MOD, sock -> native(), &ev_);
+						}						
 					}
 				}
 				
 			}else if (events.get()[i].events & EPOLLOUT) {
+				_I("out");
 
-//				packFdData *pfdptr = (packFdData *)events.get()[i].data.ptr;
-
-//				Buffer<uint8_t> *bufferptr = (Buffer<uint8_t> *)events.get()[i].data.ptr;
+				packFdData *pfdptr = (packFdData*)malloc(sizeof(packFdData));
+				pfdptr = (packFdData*)events.get()[i].data.ptr;
 				
-//				SocketPtr sock = handlers_[events.get()[i].data.fd];
+				Buffer<uint8_t> responseStr;
+				responseStr.append(pfdptr -> bu_data,pfdptr -> bu_size);
 
-//				sock -> write(responseStr.data(), responseStr.size());
+				Socket sock(pfdptr -> fdno);
 
-//				ev_.data.fd = sock -> native();
-//            	ev_.events = EPOLLIN | EPOLLET;
-//            	epoll_ctl(epfd_, EPOLL_CTL_MOD, sock -> native(), &ev_); 
+				if(responseStr.size() > 0)
+					sock.write(responseStr.data(), responseStr.size());
+				sock.close(pfdptr -> fdno);
+/*
+				ev_.data.fd = pfdptr -> fdno;
+            	ev_.events = EPOLLIN | EPOLLET;
+            	int ret = epoll_ctl(epfd_, EPOLL_CTL_MOD, pfdptr -> fdno, &ev_);
+            	if (ret != 0) {
+					THROW_SYSTEM_ERROR();
+				}
+
+
+				ev_.events = 0;
+				ev_.data.fd = sock -> native();
+	
+				int ret = epoll_ctl(epfd_, EPOLL_CTL_DEL, sock -> native(), &ev_);
+				if (ret != 0) {
+					THROW_SYSTEM_ERROR();
+				}						
+				
+				sock -> close(sock -> native());
+				continue;
+*/			
 			}
 		}
 	}

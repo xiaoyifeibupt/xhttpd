@@ -10,7 +10,7 @@ Address::Address(std::string _host, uint16_t _port) : a_host(_host), a_port(_por
 
 }
 
-Socket::Socket() : needToWrite_(false) {
+Socket::Socket() {
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd == -1) {
 		THROW_SYSTEM_ERROR(); 
@@ -61,15 +61,15 @@ void Socket::listen() {
 	}
 }
 
-SocketPtr Socket::accept() {
+int Socket::accept() {
 	socklen_t size = sizeof(addr);
 	int ret = ::accept(sockfd, reinterpret_cast<struct sockaddr*>(&addr), &size);
-
+/*
 	if (ret == -1) {
 		THROW_SYSTEM_ERROR();
 	}
-
-	return std::make_shared<Socket>(ret);
+*/
+	return ret;
 }
 
 void Socket::makeNonBlocking() {
@@ -85,12 +85,28 @@ void Socket::makeNonBlocking() {
 void Socket::read(Buffer<uint8_t>& buffer) {
 	uint8_t buf[1024];
 	int ret = 0;
-
+/*	
 	ret = recv(sockfd, buf, sizeof(buf), 0);
 	while (ret > 0) {
 		buffer.append(buf, ret);
 		ret = recv(sockfd, buf, sizeof(buf), 0);
 	}
+*/
+	while(1) {
+		ret = ::read(sockfd, buf, 1024);
+		if(ret < 0) {
+//			if(errno == EAGAIN || errno == EWOULDBLOCK)
+//				continue;
+//			else
+				break;
+		}
+		else if(ret == 0)
+			break;
+		else {
+			buffer.append(buf, ret);
+		}
+	}
+	
 }
 
 void Socket::write(const uint8_t *buf, size_t size) {
@@ -111,37 +127,8 @@ void Socket::write(const uint8_t *buf, size_t size) {
 
 }
 
-/*
-size_t Socket::write(const uint8_t *buf, size_t size) {
-	writeBuffer_.append(buf, size);
-
-	return write();
-}
-
-size_t Socket::write() {
-	int ret = 0;
-
-	ret = ::write(sockfd, writeBuffer.data(), writeBuffer.size());
-	if (ret == -1) {
-		if (errno != EAGAIN && errno != EWOULDBLOCK) {
-			_E("Can't write to socket. Socket will be closed");
-		}
-	} else {
-		writeBuffer.drain(ret);
-	}
-
-	needToWrite_ = !!writeBuffer.size();
-
-	return writeBuffer.size();
-}
-*/
-
 int Socket::native() {
 	return sockfd;
-}
-
-bool Socket::needToWrite() const {
-	return needToWrite_;
 }
 
 Socket::Socket(int fd) : sockfd(fd) {

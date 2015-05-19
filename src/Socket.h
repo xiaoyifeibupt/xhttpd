@@ -30,7 +30,7 @@ public:
 
 	void bind(Address address);
 	void listen();
-	SocketPtr accept();
+	int accept();
 	
 	void makeNonBlocking();
 	
@@ -42,7 +42,6 @@ public:
 	
 	int native();
 	bool error();
-	bool needToWrite() const;
 
 	void close(int fd);
 
@@ -58,7 +57,6 @@ private:
 	std::string host;
 	uint16_t port;
 	Buffer<uint8_t> writeBuffer;
-	bool needToWrite_;
 };
 
 #endif
