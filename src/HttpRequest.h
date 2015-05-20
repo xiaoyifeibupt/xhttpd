@@ -25,6 +25,7 @@ public:
 	Version version;
 	Method method;
 	std::string path;
+	std::string get_query;
 
 	std::map<std::string, std::string> hdr;
 

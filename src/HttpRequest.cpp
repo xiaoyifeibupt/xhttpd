@@ -7,6 +7,7 @@ HttpRequest::HttpRequest(const std::string& req) {
 	hdr["Host"] = "";
 	hdr["User-Agent"] = "";
 	hdr["Connection"] = "";
+	hdr["Content-Length"] = "";
 
 	parse(req);
 }
@@ -27,20 +28,28 @@ int HttpRequest::parse(const std::string& req) {
 	size_t pos = 0;
 
 	if (req.substr(pos, 3) == "GET") {
-		method = Method::GET;
+		method = Method::GET;		
 		pos += 4;
+		size_t end = req.find(" ", 4);
+		path = req.substr(pos, end - pos);
+		pos = end + 1;
+		size_t parame = path.find_first_of("?");
+		if(parame < end) {
+			get_query = path.substr(parame + 1);
+			path = path.substr(0, parame);
+		}
+
 	}
-	else if (req.substr(pos, 3) == "POST") {
+	else if (req.substr(pos, 4) == "POST") {
 		method = Method::POST;
-		pos += 4;
+		pos += 5;
+		size_t end = req.find(" ", 5);
+		path = req.substr(pos, end - pos);
+		pos = end + 1;
 	}
 	else {
 		return -1;
-	}
-
-	size_t end = req.find(" ", 4);
-	path = req.substr(pos, end - pos);
-	pos = end + 1;
+	}	
 
 	if (req.substr(pos, 5) != "HTTP/")
 		return -2;
@@ -71,6 +80,10 @@ int HttpRequest::parse(const std::string& req) {
 
 		it->second = value;
 	}
+
+	size_t location = req.find("\r\n\r\n");
+	if(location != std::string::npos && method == Method::POST)
+		get_query = req.substr(location + 4);
 
 	return 0;
 }
