@@ -108,7 +108,7 @@ void Socket::read(Buffer<uint8_t>& buffer) {
 	}
 	
 }
-
+/*
 void Socket::write(const uint8_t *buf, size_t size) {
 	writeBuffer.append(buf, size);
 
@@ -120,11 +120,27 @@ void Socket::write(const uint8_t *buf, size_t size) {
 			if (errno != EAGAIN && errno != EWOULDBLOCK) {
 				_E("Can't write to socket. Socket will be closed");
 			}
+			break;
 		} else {
 			writeBuffer.drain(ret);
 		}
 	}
 
+}
+*/
+void Socket::write(const uint8_t *buf, size_t size) {
+	int nwrite;
+	int n = size;
+	while (n > 0) {
+		nwrite = ::write(sockfd, buf + size - n, n);
+		if (nwrite < n) {
+			if (nwrite == -1 && errno != EAGAIN) {
+				THROW_SYSTEM_ERROR();
+			}
+			break;
+		}
+		n -= nwrite;
+	}
 }
 
 int Socket::native() {

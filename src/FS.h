@@ -53,6 +53,9 @@ public:
 			ret = read(fd_, tmpBuf, sizeof(tmpBuf));
 		}
 	}
+	void closefile() {
+		close(fd_);
+	}
 
 
 private:

@@ -45,7 +45,8 @@ void FSRequestProcessor::process(HttpRequest& req, Buffer<uint8_t>& buffer) {
 		const std::string path = std::string("../html/index.html");
 
 		FS::File file(path, path);
-		fileContent(req, file, buffer);				
+		fileContent(req, file, buffer);
+		file.closefile();				
 
 	}
 	else if(req.path =="/favicon.ico") {

@@ -49,11 +49,10 @@ void xhttpdServer::start() {
 		for (int i = 0; i < nfds; ++i) {
 			
 			if(events.get()[i].data.fd == listener_.native()) {
-				_I("acceptbefore");
 
 				int socketfd;
 				while((socketfd = listener_.accept()) > 0) {
-					_I("accept");
+					
 					Socket sock(socketfd);
 					sock.makeNonBlocking();
 					
@@ -73,12 +72,12 @@ void xhttpdServer::start() {
 				continue;
 			}
 			else if (events.get()[i].events & EPOLLIN) {
-				_I("in");				
-				Buffer<uint8_t> buf;
+								
+				Buffer<uint8_t> buf(1024);
 				
 				Socket sock(events.get()[i].data.fd);
 
-//				sock.read(buf);
+				sock.read(buf);
 				
 			
 				std::string requestStr(
@@ -104,7 +103,7 @@ void xhttpdServer::start() {
 				for (auto it = processors_.begin(); it != processors_.end(); ++it) {
 			
 					if ((*it)->isEligible(request)) {
-						Buffer<uint8_t> buffer;
+						Buffer<uint8_t> buffer(1024);
 		
 						try {			
 											
@@ -149,12 +148,11 @@ void xhttpdServer::start() {
 				}
 				
 			}else if (events.get()[i].events & EPOLLOUT) {
-				_I("out");
 
 				packFdData *pfdptr = (packFdData*)malloc(sizeof(packFdData));
 				pfdptr = (packFdData*)events.get()[i].data.ptr;
 				
-				Buffer<uint8_t> responseStr;
+				Buffer<uint8_t> responseStr(1024);
 				responseStr.append(pfdptr -> bu_data,pfdptr -> bu_size);
 
 				Socket sock(pfdptr -> fdno);

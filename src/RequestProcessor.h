@@ -47,7 +47,7 @@ public:
 		
 		ss << "HTTP/" << req.versionToStr() << " " << status <<
 			StatusToStr(status) << "\nContent-Length:" <<
-			size << "\n\n";
+			size << "\nServer:Xhttpd\n\n";
 
 		buffer.append(reinterpret_cast<const uint8_t*>(ss.str().data()), ss.str().size());
 		buffer.append(reinterpret_cast<const uint8_t*>(content), size);
