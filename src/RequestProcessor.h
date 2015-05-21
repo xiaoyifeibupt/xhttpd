@@ -5,7 +5,7 @@
 #include <sstream>
 
 #include "HttpRequest.h"
-#include "Buffer.h"
+#include "DataBuffer.h"
 
 class RequestProcessor
 {
@@ -19,7 +19,7 @@ public:
 
 	RequestProcessor() { };
 
-	virtual void process(HttpRequest& req, Buffer<uint8_t>& buffer) = 0;
+	virtual void process(HttpRequest& req, DataBuffer<uint8_t>& buffer) = 0;
 	virtual bool isEligible(const HttpRequest& req) const = 0;
 
 	std::string StatusToStr(HttpStatus status) {
@@ -41,7 +41,7 @@ public:
 	}
 
 	void makeHttpResponse(HttpRequest& req, const char *content, size_t size,
-		Buffer<uint8_t>& buffer, HttpStatus status = OK) {
+		DataBuffer<uint8_t>& buffer, HttpStatus status = OK) {
 
 		std::stringstream ss;
 		

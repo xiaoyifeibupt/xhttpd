@@ -7,7 +7,7 @@
 #include <memory>
 #include <string>
 
-#include "Buffer.h"
+#include "DataBuffer.h"
 
 struct Address {
 	Address(std::string host, uint16_t port);
@@ -34,7 +34,7 @@ public:
 	
 	void makeNonBlocking();
 	
-	void read(Buffer<uint8_t>& buffer);
+	void read(DataBuffer<uint8_t>& buffer);
 	
 	
 	void write(const uint8_t *buf, size_t size);
@@ -56,7 +56,7 @@ private:
 
 	std::string host;
 	uint16_t port;
-	Buffer<uint8_t> writeBuffer;
+	DataBuffer<uint8_t> writeBuffer;
 };
 
 #endif

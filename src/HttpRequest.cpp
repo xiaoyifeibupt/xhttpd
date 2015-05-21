@@ -82,8 +82,8 @@ int HttpRequest::parse(const std::string& req) {
 	}
 
 	size_t location = req.find("\r\n\r\n");
-	if(location != std::string::npos && method == Method::POST)
-		get_query = req.substr(location + 4);
+	if(location != std::string::npos && method == Method::POST && hdr["Content-Length"] != "")
+		get_query = req.substr(location + 4,atoi(hdr["Content-Length"].c_str()));
 
 	return 0;
 }

@@ -6,10 +6,10 @@ ErrorRequestProcessor::ErrorRequestProcessor() {
 
 }
 
-void ErrorRequestProcessor::process(HttpRequest& req, Buffer<uint8_t>& buffer) {
+void ErrorRequestProcessor::process(HttpRequest& req, DataBuffer<uint8_t>& buffer) {
 	
 	std::string content;
-	Buffer<char> content404;
+	DataBuffer<char> content404;
 	HttpStatus status;
 
 	if (code_ == EACCES) {

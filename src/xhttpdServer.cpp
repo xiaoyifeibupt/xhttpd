@@ -33,7 +33,7 @@ xhttpdServer::~xhttpdServer() {
 
 void xhttpdServer::start() {
 	
-	Buffer<uint8_t> responseStr;
+	DataBuffer<uint8_t> responseStr;
 	
 	_I("Server started at 0.0.0.0:" << port_);
 	
@@ -73,7 +73,7 @@ void xhttpdServer::start() {
 			}
 			else if (events.get()[i].events & EPOLLIN) {
 								
-				Buffer<uint8_t> buf(1024);
+				DataBuffer<uint8_t> buf(1024);
 				
 				Socket sock(events.get()[i].data.fd);
 
@@ -103,7 +103,7 @@ void xhttpdServer::start() {
 				for (auto it = processors_.begin(); it != processors_.end(); ++it) {
 			
 					if ((*it)->isEligible(request)) {
-						Buffer<uint8_t> buffer(1024);
+						DataBuffer<uint8_t> buffer(1024);
 		
 						try {			
 											
@@ -152,7 +152,7 @@ void xhttpdServer::start() {
 				packFdData *pfdptr = (packFdData*)malloc(sizeof(packFdData));
 				pfdptr = (packFdData*)events.get()[i].data.ptr;
 				
-				Buffer<uint8_t> responseStr(1024);
+				DataBuffer<uint8_t> responseStr(1024);
 				responseStr.append(pfdptr -> bu_data,pfdptr -> bu_size);
 
 				Socket sock(pfdptr -> fdno);

@@ -10,7 +10,7 @@
 #include <memory>
 #include <string>
 
-#include "Buffer.h"
+#include "DataBuffer.h"
 
 namespace FS
 {
@@ -27,7 +27,7 @@ public:
 	const std::string& name() const;
 
 	template<typename T>
-	void content(Buffer<T>& buffer) {
+	void content(DataBuffer<T>& buffer) {
 		
 		if (fd_ < 0) {
 			

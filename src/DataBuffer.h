@@ -1,15 +1,15 @@
-#ifndef __BUFFER_H__
-#define __BUFFER_H__
+#ifndef __DATABUFFER_H__
+#define __DATABUFFER_H__
 
 #include <stdlib.h>
 
 #include "Log.h"
 
 template<typename T>
-class Buffer
+class DataBuffer
 {
 public:
-	Buffer(size_t capacity = 1024) : capacity_(capacity) , size_(0) {
+	DataBuffer(size_t capacity = 1024) : capacity_(capacity) , size_(0) {
 		if (capacity_ == 0) {
 			data_ = nullptr;
 			return;
@@ -21,13 +21,13 @@ public:
 		}
 	}
 
-	Buffer(Buffer& bu) {
+	DataBuffer(DataBuffer& bu) {
 		data_ = bu.data_;
 		capacity_ = bu.capacity_;
 		size_ = bu.size_;
 	}
 
-	~Buffer() {
+	~DataBuffer() {
 		if (data_) {
 			free(data_);
 		}

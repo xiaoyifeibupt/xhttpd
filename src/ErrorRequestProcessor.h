@@ -1,7 +1,7 @@
 #ifndef __ERROR_REQUEST_PROCESSOR__
 #define __ERROR_REQUEST_PROCESSOR__
 
-#include "Buffer.h"
+#include "DataBuffer.h"
 #include "FS.h"
 #include "RequestProcessor.h"
 
@@ -12,7 +12,7 @@ public:
 
 	void setLastErrorCode(int code);
 	
-	void process(HttpRequest& req, Buffer<uint8_t>& buffer) override;
+	void process(HttpRequest& req, DataBuffer<uint8_t>& buffer) override;
 	
 	bool isEligible(const HttpRequest& req) const override;
 

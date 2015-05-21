@@ -82,7 +82,7 @@ void Socket::makeNonBlocking() {
 	}
 }
 
-void Socket::read(Buffer<uint8_t>& buffer) {
+void Socket::read(DataBuffer<uint8_t>& buffer) {
 	uint8_t buf[1024];
 	int ret = 0;
 /*	

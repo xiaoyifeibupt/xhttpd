@@ -1,6 +1,7 @@
 #include <sstream>
 #include <sys/types.h>
 #include <unistd.h>
+#include <sys/wait.h>
 #include "FS.h"
 #include "FSRequestProcessor.h"
 
@@ -9,9 +10,9 @@ FSRequestProcessor::FSRequestProcessor() {
 }
 
 void FSRequestProcessor::fileContent(HttpRequest& req,
-				FS::File& file, Buffer<uint8_t>& buffer) {
+				FS::File& file, DataBuffer<uint8_t>& buffer) {
 		
-	Buffer<char> content;
+	DataBuffer<char> content;
 
 	file.content(content);
 
@@ -19,7 +20,7 @@ void FSRequestProcessor::fileContent(HttpRequest& req,
 }
 
 void FSRequestProcessor::dirContent(HttpRequest& req,
-				FS::File& file, Buffer<uint8_t>& buffer) {
+				FS::File& file, DataBuffer<uint8_t>& buffer) {
 		
 	FS::Directory dir(file.path());
 
@@ -41,7 +42,7 @@ void FSRequestProcessor::dirContent(HttpRequest& req,
 	makeHttpResponse(req, content.data(), content.size(), buffer);
 }
 
-void FSRequestProcessor::process(HttpRequest& req, Buffer<uint8_t>& buffer) {
+void FSRequestProcessor::process(HttpRequest& req, DataBuffer<uint8_t>& buffer) {
 	if(req.method == HttpRequest::Method::GET && req.get_query.size() == 0) {
 		if(req.path =="/" || req.path =="/index.html") {
 
@@ -73,12 +74,17 @@ void FSRequestProcessor::process(HttpRequest& req, Buffer<uint8_t>& buffer) {
 		}
 	}
 	else {
+		DataBuffer<char> conbuf;
 		int cgi_output[2];
 		int cgi_input[2];
 		pid_t pid;
 		int pidstatus;
-		if(pipe(cgi_output) < 0 || pipe(cgi_input) < 0 || (pid = fork()) < 0)
+		if(pipe(cgi_output) < 0 || pipe(cgi_input) < 0) {
 			THROW_SYSTEM_ERROR();
+		}
+		if ((pid = fork()) < 0){
+			THROW_SYSTEM_ERROR();
+		}
 		if (pid == 0) {
 			// 把 STDOUT 重定向到 cgi_output 的写入端
 			dup2(cgi_output[1], 1);
@@ -87,9 +93,55 @@ void FSRequestProcessor::process(HttpRequest& req, Buffer<uint8_t>& buffer) {
 			// 关闭 cgi_input 的写入端 和 cgi_output 的读取端
 			close(cgi_output[0]);
 			close(cgi_input[1]);
-			
+			std::string meth_env = "REQUEST_METHOD=";
+			if(req.method == HttpRequest::Method::GET) {
+				std::string query_env = "QUERY_STRING=" + req.get_query;
+				char *cquery_env = new char[query_env.size()];
+				strcpy(cquery_env, query_env.c_str());
+				putenv(cquery_env);
+				meth_env += "GET";
+			}
+			else {
+				std::string length_env = "CONTENT_LENGTH=" + req.hdr["Content-Length"];
+				char *clength_env = new char[length_env.size()];
+				strcpy(clength_env, length_env.c_str());
+				putenv(clength_env);
+				meth_env += "POST";
+			}
+			char *cmeth_env = new char[meth_env.size()];
+			strcpy(cmeth_env, meth_env.c_str());
+			putenv(cmeth_env);
+			execl(req.path.c_str(), req.path.c_str(), NULL);
+			exit(0);
+
+		}
+		else {
+			// 关闭 cgi_input 的读取端 和 cgi_output 的写入端 
+			close(cgi_output[1]);
+			close(cgi_input[0]);
+			if(req.method == HttpRequest::Method::POST) {
+				char *postquery = new char[req.get_query.size()];
+				strcpy(postquery, req.get_query.c_str());
+				int postquerySize = atoi(req.hdr["Content-Length"].c_str());
+				size_t wrnum = write(cgi_input[1], postquery, postquerySize);
+			}
+			char *c;
+
+			while (read(cgi_output[0], c, 1) > 0) {
+				if (c != NULL){
+					conbuf.append(c, 1);
+				}
+				c = NULL;					
+			}
+
+			// 关闭管道
+			close(cgi_output[0]);
+			close(cgi_input[1]);
+			// 等待子进程
+			waitpid(pid, &pidstatus, 0);
 		}
 
+		makeHttpResponse(req, conbuf.data(), conbuf.size(), buffer);
 	}
 	
 	
