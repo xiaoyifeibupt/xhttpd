@@ -63,35 +63,36 @@
 	Document Length:        0 bytes
 	
 	Concurrency Level:      500
-	Time taken for tests:   7.609 seconds
+	Time taken for tests:   1.410 seconds
 	Complete requests:      10000
-	Failed requests:        445
-	   (Connect: 0, Receive: 0, Length: 445, Exceptions: 0)
-	Non-2xx responses:      274
-	Total transferred:      4290000 bytes
-	HTML transferred:       159494 bytes
-	Requests per second:    1314.20 [#/sec] (mean)
-	Time per request:       380.459 [ms] (mean)
-	Time per request:       0.761 [ms] (mean, across all concurrent requests)
-	Transfer rate:          550.58 [Kbytes/sec] received
+	Failed requests:        543
+	   (Connect: 0, Receive: 0, Length: 543, Exceptions: 0)
+	Non-2xx responses:      385
+	Total transferred:      4970000 bytes
+	HTML transferred:       236808 bytes
+	Requests per second:    7093.94 [#/sec] (mean)
+	Time per request:       70.483 [ms] (mean)
+	Time per request:       0.141 [ms] (mean, across all concurrent requests)
+	Transfer rate:          3443.05 [Kbytes/sec] received
 	
 	Connection Times (ms)
 	              min  mean[+/-sd] median   max
-	Connect:        0   36 219.6      3    3004
-	Processing:     5  237 577.0     25    6540
-	Waiting:        4  236 577.4     23    6540
-	Total:         13  273 674.0     28    7542
+	Connect:        0   17  96.3      5    1000
+	Processing:     9   41  50.2     27     365
+	Waiting:        7   39  50.9     24     365
+	Total:         14   58 112.5     33    1363
 	
 	Percentage of the requests served within a certain time (ms)
-	  50%     28
-	  66%     31
-	  75%     33
+	  50%     33
+	  66%     40
+	  75%     43
 	  80%     44
-	  90%   1357
-	  95%   1626
-	  98%   1857
-	  99%   3031
-	 100%   7542 (longest request)
+	  90%    122
+	  95%    205
+	  98%    238
+	  99%    242
+	 100%   1363 (longest request)
+
 
 
 ####nginx

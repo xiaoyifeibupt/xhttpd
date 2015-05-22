@@ -2,15 +2,15 @@
 #include <sys/types.h>
 #include <unistd.h>
 #include <sys/wait.h>
-#include "FS.h"
-#include "FSRequestProcessor.h"
+#include "FilePro.h"
+#include "NormalRequestProcessor.h"
 
-FSRequestProcessor::FSRequestProcessor() {
+NormalRequestProcessor::NormalRequestProcessor() {
 
 }
 
-void FSRequestProcessor::fileContent(HttpRequest& req,
-				FS::File& file, DataBuffer<uint8_t>& buffer) {
+void NormalRequestProcessor::fileContent(HttpRequest& req,
+				FilePro::File& file, DataBuffer<uint8_t>& buffer) {
 		
 	DataBuffer<char> content;
 
@@ -19,13 +19,13 @@ void FSRequestProcessor::fileContent(HttpRequest& req,
 	makeHttpResponse(req, content.data(), content.size(), buffer);
 }
 
-void FSRequestProcessor::dirContent(HttpRequest& req,
-				FS::File& file, DataBuffer<uint8_t>& buffer) {
+void NormalRequestProcessor::dirContent(HttpRequest& req,
+				FilePro::File& file, DataBuffer<uint8_t>& buffer) {
 		
-	FS::Directory dir(file.path());
+	FilePro::Directory dir(file.path());
 
 	std::stringstream ss;
-	FS::FilePtr f;
+	FilePro::FilePtr f;
 
 	ss << "<table>";
 
@@ -42,13 +42,13 @@ void FSRequestProcessor::dirContent(HttpRequest& req,
 	makeHttpResponse(req, content.data(), content.size(), buffer);
 }
 
-void FSRequestProcessor::process(HttpRequest& req, DataBuffer<uint8_t>& buffer) {
+void NormalRequestProcessor::process(HttpRequest& req, DataBuffer<uint8_t>& buffer) {
 	if(req.method == HttpRequest::Method::GET && req.get_query.size() == 0) {
 		if(req.path =="/" || req.path =="/index.html") {
 
 			const std::string path = std::string("../html/index.html");
 
-			FS::File file(path, path);
+			FilePro::File file(path, path);
 			fileContent(req, file, buffer);
 			file.closefile();				
 
@@ -56,7 +56,7 @@ void FSRequestProcessor::process(HttpRequest& req, DataBuffer<uint8_t>& buffer) 
 		else if(req.path =="/favicon.ico") {
 
 			const std::string path = std::string("../html/favicon.ico");
-			FS::File file(path, path);
+			FilePro::File file(path, path);
 
 			fileContent(req, file, buffer);
 
@@ -64,7 +64,7 @@ void FSRequestProcessor::process(HttpRequest& req, DataBuffer<uint8_t>& buffer) 
 		else {
 
 			const std::string path = std::string("../html") + req.path;
-			FS::File file(path, path);
+			FilePro::File file(path, path);
 
 			if (file.isRegular()) {
 				fileContent(req, file, buffer);
@@ -147,7 +147,7 @@ void FSRequestProcessor::process(HttpRequest& req, DataBuffer<uint8_t>& buffer) 
 	
 }
 
-bool FSRequestProcessor::isEligible(const HttpRequest& req) const {
+bool NormalRequestProcessor::isEligible(const HttpRequest& req) const {
 	
 	(void)req;
 	return true;

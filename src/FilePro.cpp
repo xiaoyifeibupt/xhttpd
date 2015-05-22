@@ -1,9 +1,9 @@
 #include <memory>
 
-#include "FS.h"
+#include "FilePro.h"
 #include "Log.h"
 
-namespace FS
+namespace FilePro
 {
 
 File::File(const std::string path, const std::string name): path_(path), name_(name) {

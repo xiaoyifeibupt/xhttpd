@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "FSRequestProcessor.h"
+#include "NormalRequestProcessor.h"
 #include "xhttpdServer.h"
 
 int main()
@@ -9,7 +9,7 @@ int main()
 
 
 	server->addReqProcessor(
-		std::make_shared<FSRequestProcessor>());
+		std::make_shared<NormalRequestProcessor>());
 
 	server->start();
 

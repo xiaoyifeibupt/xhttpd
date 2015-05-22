@@ -24,7 +24,7 @@ void ErrorRequestProcessor::process(HttpRequest& req, DataBuffer<uint8_t>& buffe
 //		content = "404 ";		
 		const std::string path = std::string("../html/404.html");
 
-		FS::File file(path, path);
+		FilePro::File file(path, path);
 		file.content(content404);
 		makeHttpResponse(req, content404.data(), content404.size(), buffer, status);
 

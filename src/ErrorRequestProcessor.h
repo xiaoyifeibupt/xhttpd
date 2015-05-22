@@ -2,7 +2,7 @@
 #define __ERROR_REQUEST_PROCESSOR__
 
 #include "DataBuffer.h"
-#include "FS.h"
+#include "FilePro.h"
 #include "RequestProcessor.h"
 
 class ErrorRequestProcessor : public RequestProcessor

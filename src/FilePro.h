@@ -1,5 +1,5 @@
-#ifndef __FS_H__
-#define __FS_H__
+#ifndef __FILEPRO_H__
+#define __FILEPRO_H__
 
 #include <dirent.h>
 #include <fcntl.h>
@@ -12,7 +12,7 @@
 
 #include "DataBuffer.h"
 
-namespace FS
+namespace FilePro
 {
 
 class File

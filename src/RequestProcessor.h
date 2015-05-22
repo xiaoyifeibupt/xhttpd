@@ -46,8 +46,8 @@ public:
 		std::stringstream ss;
 		
 		ss << "HTTP/" << req.versionToStr() << " " << status <<
-			StatusToStr(status) << "\nContent-Length:" <<
-			size << "\nServer:Xhttpd\n\n";
+			StatusToStr(status) << "\r\nContent-Length:" <<
+			size << "\r\nContent-Type: text/html\r\nServer:Xhttpd\r\n\r\n";
 
 		buffer.append(reinterpret_cast<const uint8_t*>(ss.str().data()), ss.str().size());
 		buffer.append(reinterpret_cast<const uint8_t*>(content), size);

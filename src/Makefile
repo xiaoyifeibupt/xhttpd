@@ -1,16 +1,16 @@
 CF=-std=c++11 -Wall -Wextra -pthread -g
 
-xhttpd : main.o FS.o FSRequestProcessor.o ErrorRequestProcessor.o HttpRequest.o xhttpdServer.o Socket.o
-	g++ -o xhttpd $(CF) main.o FS.o FSRequestProcessor.o ErrorRequestProcessor.o HttpRequest.o xhttpdServer.o Socket.o
+xhttpd : main.o FilePro.o NormalRequestProcessor.o ErrorRequestProcessor.o HttpRequest.o xhttpdServer.o Socket.o
+	g++ -o xhttpd $(CF) main.o FilePro.o NormalRequestProcessor.o ErrorRequestProcessor.o HttpRequest.o xhttpdServer.o Socket.o
 
-main.o : main.cpp FSRequestProcessor.h xhttpdServer.h
+main.o : main.cpp NormalRequestProcessor.h xhttpdServer.h
 	g++ -c $(CF) main.cpp
 
-FS.o : FS.cpp FS.h 
-	g++ -c $(CF) FS.cpp
+FilePro.o : FilePro.cpp FilePro.h 
+	g++ -c $(CF) FilePro.cpp
 
-FSRequestProcessor.o : FSRequestProcessor.cpp FSRequestProcessor.h FS.h
-	g++ -c $(CF) FSRequestProcessor.cpp
+NormalRequestProcessor.o : NormalRequestProcessor.cpp NormalRequestProcessor.h FilePro.h
+	g++ -c $(CF) NormalRequestProcessor.cpp
 
 HttpRequest.o : HttpRequest.cpp HttpRequest.h
 	g++ -c $(CF) HttpRequest.cpp
