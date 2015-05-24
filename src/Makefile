@@ -1,7 +1,7 @@
 CF=-std=c++11 -Wall -Wextra -pthread -g
 
-xhttpd : main.o FilePro.o NormalRequestProcessor.o ErrorRequestProcessor.o HttpRequest.o xhttpdServer.o Socket.o
-	g++ -o xhttpd $(CF) main.o FilePro.o NormalRequestProcessor.o ErrorRequestProcessor.o HttpRequest.o xhttpdServer.o Socket.o
+xhttpd : main.o FilePro.o NormalRequestProcessor.o ErrorRequestProcessor.o HttpRequest.o xhttpdServer.o xhttpdWorker.o Socket.o
+	g++ -o xhttpd $(CF) main.o FilePro.o NormalRequestProcessor.o ErrorRequestProcessor.o HttpRequest.o xhttpdServer.o xhttpdWorker.o Socket.o
 
 main.o : main.cpp NormalRequestProcessor.h xhttpdServer.h
 	g++ -c $(CF) main.cpp
@@ -18,8 +18,11 @@ HttpRequest.o : HttpRequest.cpp HttpRequest.h
 ErrorRequestProcessor.o : ErrorRequestProcessor.cpp ErrorRequestProcessor.h
 	g++ -c $(CF) ErrorRequestProcessor.cpp
 
-xhttpdServer.o : xhttpdServer.cpp xhttpdServer.h ErrorRequestProcessor.h HttpRequest.h
+xhttpdServer.o : xhttpdServer.cpp xhttpdServer.h
 	g++ -c $(CF) xhttpdServer.cpp
+
+xhttpdWorker.o : xhttpdWorker.cpp xhttpdWorker.h DataBuffer.h NormalRequestProcessor.h ErrorRequestProcessor.h HttpRequest.h
+	g++ -c $(CF) xhttpdWorker.cpp
 
 Socket.o : Socket.cpp Socket.h Log.h
 	g++ -c $(CF) Socket.cpp

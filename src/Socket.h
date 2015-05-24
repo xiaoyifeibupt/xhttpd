@@ -30,7 +30,7 @@ public:
 
 	void bind(Address address);
 	void listen();
-	int accept();
+	SocketPtr accept();
 	
 	void makeNonBlocking();
 	

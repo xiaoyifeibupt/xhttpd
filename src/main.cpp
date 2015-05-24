@@ -5,11 +5,7 @@
 
 int main()
 {
-	xhttpdServerPtr server = std::make_shared<xhttpdServer>(8080);
-
-
-	server->addReqProcessor(
-		std::make_shared<NormalRequestProcessor>());
+	xhttpdServerPtr server = std::make_shared<xhttpdServer>(8080,10);
 
 	server->start();
 

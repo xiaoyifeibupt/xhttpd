@@ -61,15 +61,15 @@ void Socket::listen() {
 	}
 }
 
-int Socket::accept() {
+SocketPtr Socket::accept() {
 	socklen_t size = sizeof(addr);
 	int ret = ::accept(sockfd, reinterpret_cast<struct sockaddr*>(&addr), &size);
-/*
+
 	if (ret == -1) {
 		THROW_SYSTEM_ERROR();
 	}
-*/
-	return ret;
+
+	return std::make_shared<Socket>(ret);
 }
 
 void Socket::makeNonBlocking() {

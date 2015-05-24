@@ -8,37 +8,31 @@ ErrorRequestProcessor::ErrorRequestProcessor() {
 
 void ErrorRequestProcessor::process(HttpRequest& req, DataBuffer<uint8_t>& buffer) {
 	
-	std::string content;
-	DataBuffer<char> content404;
+	DataBuffer<char> content;
 	HttpStatus status;
 
 	if (code_ == EACCES) {
 		status = FORBIDDEN;
-		content = "403 ";
-
-		content += req.path;
-	
-		makeHttpResponse(req, content.data(), content.size(), buffer, status);
-	} else if (code_ == ENOENT) {
-		status = NOT_FOUND;
-//		content = "404 ";		
-		const std::string path = std::string("../html/404.html");
-
+		const std::string path = std::string("../html/403.html");
 		FilePro::File file(path, path);
-		file.content(content404);
-		makeHttpResponse(req, content404.data(), content404.size(), buffer, status);
+		file.content(content);
 
+	} else if (code_ == ENOENT) {
+		status = NOT_FOUND;	
+		const std::string path = std::string("../html/404.html");
+		FilePro::File file(path, path);
+		file.content(content);
 
 	} else {
 		status = INTERNAL_ERROR;
-		content = "500 ";
+		const std::string path = std::string("../html/500.html");
+		FilePro::File file(path, path);
+		file.content(content);
 		
-		content += req.path;
-	
-		makeHttpResponse(req, content.data(), content.size(), buffer, status);
 	}
 
 	
+	makeHttpResponse(req, content.data(), content.size(), buffer, status);	
 	
 	(void)req;
 
