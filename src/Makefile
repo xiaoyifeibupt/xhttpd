@@ -26,3 +26,6 @@ xhttpdWorker.o : xhttpdWorker.cpp xhttpdWorker.h DataBuffer.h NormalRequestProce
 
 Socket.o : Socket.cpp Socket.h Log.h
 	g++ -c $(CF) Socket.cpp
+
+clean :
+	rm *.o xhttpd
